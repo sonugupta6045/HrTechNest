@@ -1,0 +1,55 @@
+{
+  "name": "John Doe",
+  "email": "john.doe@email.com",
+  "phone": "(555) 123-4567",
+  "skills": [
+    "aws",
+    "docker",
+    "express",
+    "go",
+    "java",
+    "javascript",
+    "jenkins",
+    "kubernetes",
+    "mongodb",
+    "node.js",
+    "postgresql",
+    "python",
+    "r",
+    "react",
+    "sql"
+  ],
+  "experience": {
+    "years": "",
+    "job_titles": [
+      "Senior Software Engineer ",
+      "junior developer",
+      " architect",
+      "\nSoftware Engineer ",
+      "\nSoftware Engineer",
+      "Senior Software Engineer"
+    ],
+    "companies": [
+      "UX team\nEDUCATION\nBachelor of Science in Computer Science\nUniversity of Technology\n2014 "
+    ]
+  },
+  "education": {
+    "degrees": [
+      "Bachelor of Science",
+      "Computer Science\nUniversity"
+    ],
+    "schools": [
+      "Bachelor of Science in Computer Science\nUniversity"
+    ],
+    "years": [
+      "2018",
+      "2014"
+    ],
+    "gpas": []
+  },
+  "projects": [],
+  "certifications": [],
+  "candidateId": "CAND-1744708994-2472",
+  "matchScore": 40,
+  "extractedText": "John Doe\n \nSoftware Engineer\njohn.doe@email.com | (555) 123-4567 | linkedin.com/in/johndoe\nPROFESSIONAL SUMMARY\nExperienced software engineer with a strong background in web development and cloud technologies.\nSkilled in JavaScript, Python, and AWS.\nEXPERIENCE\nSenior Software Engineer | Tech Corp\n2020 - Present\n- Led development of microservices architecture\n- Implemented CI/CD pipelines\n- Mentored junior developers\nSoftware Engineer | Web Solutions Inc\n2018 - 2020\n- Developed full-stack web applications\n- Optimized database performance\n- Collaborated with UX team\nEDUCATION\nBachelor of Science in Computer Science\nUniversity of Technology\n2014 - 2018\nSKILLS\n- Programming: JavaScript, Python, Java\n- Web: React, Node.js, Express\n- Cloud: AWS, Docker, Kubernetes\n- Database: PostgreSQL, MongoDB\n- Tools: Git, Jenkins, JIRA\n\n"
+}

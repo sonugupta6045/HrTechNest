@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id
+  name         String
+  email        String        @unique
+  title        String?
+  department   String?
+  bio          String?
+  phone        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  clerkId      String        @unique
+  applications Application[]
+  interviews   Interview[]
+  positions    Position[]
+}
+
+model Candidate {
+  id                String        @id @default(cuid())
+  name              String
+  email             String        @unique
+  phone             String?
+  resumeUrl         String?
+  skills            String[]
+  experience        String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  extractedData     Json?
+  tenthSchool       String?
+  tenthYear         String?
+  tenthPercentage   String?
+  twelfthSchool     String?
+  twelfthYear       String?
+  twelfthPercentage String?
+  applications      Application[]
+  interviews        Interview[]
+}
+
+model Position {
+  id           String         @id @default(cuid())
+  title        String
+  department   String
+  location     String
+  type         String
+  description  String
+  requirements String
+  postedDate   DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  userId       String
+  status       PositionStatus @default(OPEN)
+  applications Application[]
+  createdBy    User           @relation(fields: [userId], references: [id])
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  title        String
+  company      String
+  location     String
+  description  String
+  requirements String
+  salary       String?
+  type         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  analysis     Json?
+  positionId   String
+}
+
+model Application {
+  id                String      @id @default(cuid())
+  candidateId       String
+  userId            String?
+  resumeUrl         String
+  coverLetter       String?
+  status            String      @default("PENDING")
+  matchScore        Int?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  email             String
+  experience        String?
+  name              String
+  phone             String?
+  positionId        String?
+  skills            String[]
+  analysis          Json?
+  positionTitle     String?
+  tenthSchool       String?
+  tenthYear         String?
+  tenthPercentage   String?
+  twelfthSchool     String?
+  twelfthYear       String?
+  twelfthPercentage String?
+  candidate         Candidate   @relation(fields: [candidateId], references: [id])
+  position          Position?   @relation(fields: [positionId], references: [id])
+  user              User?       @relation(fields: [userId], references: [id])
+  interviews        Interview[]
+}
+
+model Interview {
+  id                    String      @id @default(cuid())
+  scheduledFor          DateTime
+  duration              Int         @default(60)
+  meetingUrl            String?
+  notes                 String?
+  status                String      @default("Scheduled")
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  applicationId         String
+  candidateId           String
+  userId                String
+  googleCalendarEventId String?
+  application           Application @relation(fields: [applicationId], references: [id])
+  candidate             Candidate   @relation(fields: [candidateId], references: [id])
+  scheduler             User        @relation(fields: [userId], references: [id])
+}
+
+model Contact {
+  id           String    @id @default(cuid())
+  name         String
+  email        String
+  subject      String
+  message      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  responseDate DateTime?
+  status       String?   @default("pending")
+}
+
+enum PositionStatus {
+  OPEN
+  CLOSED
+  PENDING
+}

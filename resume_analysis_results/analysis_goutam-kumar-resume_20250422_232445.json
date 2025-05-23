@@ -1,0 +1,63 @@
+{
+  "Full Name": "Goutam Kumar",
+  "Email Address": "kumargoutam70415@gmail.com",
+  "Phone Number": "+91 7977774524",
+  "Education": [
+    {
+      "degree": "12th Standard",
+      "institution": "Nirmala Memorial Foundation College of Commerce and Science",
+      "graduation year": 2021
+    },
+    {
+      "degree": "10th Standard",
+      "institution": "St. Francis D\u2019assisi High School",
+      "graduation year": 2019
+    }
+  ],
+  "Skills": [
+    "Java",
+    "JDBC",
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "Eclipse",
+    "Editplus",
+    "Git",
+    "Github",
+    "MYSQL",
+    "XML",
+    "Servlet",
+    "Apache Server",
+    "MVC",
+    "Design by Contract",
+    "Python",
+    "C",
+    "Bootstrap",
+    "React.js",
+    "MongoDB",
+    "Firebase",
+    "Clerk Authentication",
+    "Xampp",
+    "Communication",
+    "Team Management",
+    "Leadership",
+    "Adaptability",
+    "Public Speaking",
+    "Natural Language Processing (NLP)"
+  ],
+  "Work Experience": [
+    {
+      "company": "SDAC INFOTECH",
+      "job_title": "INTERN",
+      "duration": "July 2024 - October 2024 (4 months)"
+    }
+  ],
+  "Projects": [
+    {
+      "name": "HR-Automation",
+      "description": "A professional summary in a resume is a concise paragraph, typically placed at the top of the document, that summarizes your key skills, experience, and achievements. It acts as a quick overview of your career profile and helps hiring managers understand your qualifications and how they align with the job requirement",
+      "technologies": "NextJs, RactJs, Tailwind Css, NeonDB, Prisma"
+    }
+  ],
+  "Certifications": []
+}

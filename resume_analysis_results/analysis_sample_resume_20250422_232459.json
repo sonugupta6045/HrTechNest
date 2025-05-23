@@ -1,0 +1,27 @@
+{
+  "full_name": "John Doe",
+  "email_address": "john.doe@example.com",
+  "phone_number": "(123) 456-7890",
+  "education": [
+    {
+      "degree": "10th Standard",
+      "institution": "ABC High School",
+      "graduation_year": 2010
+    },
+    {
+      "degree": "12th Standard",
+      "institution": "XYZ Higher Secondary School",
+      "graduation_year": 2012
+    }
+  ],
+  "skills": [
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Python",
+    "SQL"
+  ],
+  "work_experience": [],
+  "projects": [],
+  "certifications": []
+}
