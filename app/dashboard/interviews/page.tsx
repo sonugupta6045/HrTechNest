@@ -14,7 +14,9 @@ import { format } from "date-fns"
 import { useToast } from "@/components/ui/use-toast"
 import { useUser } from "@clerk/nextjs"
 
-export default function InterviewsPage() {
+import { Suspense } from "react"
+
+function InterviewDetails() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const applicationId = searchParams.get("applicationId")
@@ -65,7 +67,6 @@ export default function InterviewsPage() {
   const fetchInterviewByApplication = async (appId: string) => {
     try {
       setLoading(true)
-      // Get all interviews and filter by application ID
       const response = await fetch(`/api/interviews/list`)
       
       if (!response.ok) {
@@ -115,7 +116,6 @@ export default function InterviewsPage() {
         description: "Interview notes saved successfully",
       })
       
-      // Navigate back to the interviews list page
       router.push("/dashboard/interviews/list")
     } catch (error) {
       console.error("Error saving notes:", error)
@@ -154,7 +154,6 @@ export default function InterviewsPage() {
         description: "Interview status updated successfully",
       })
       
-      // Navigate back to the interviews list page
       router.push("/dashboard/interviews/list")
     } catch (error) {
       console.error("Error updating status:", error)
@@ -245,7 +244,6 @@ export default function InterviewsPage() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* Interview Info Card */}
         <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Interview Information</CardTitle>
@@ -341,9 +339,7 @@ export default function InterviewsPage() {
           </CardContent>
         </Card>
 
-        {/* Main Content */}
         <div className="md:col-span-2 space-y-6">
-          {/* Candidate Card */}
           <Card>
             <CardHeader>
               <CardTitle>Candidate Information</CardTitle>
@@ -383,7 +379,6 @@ export default function InterviewsPage() {
             </CardContent>
           </Card>
 
-          {/* Interview Notes Card */}
           <Card>
             <CardHeader>
               <CardTitle>Interview Notes</CardTitle>
@@ -416,7 +411,19 @@ export default function InterviewsPage() {
   )
 }
 
-// Input component extracted from your code
+export default function InterviewsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col justify-center items-center h-[calc(100vh-200px)] space-y-4">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    }>
+      <InterviewDetails />
+    </Suspense>
+  )
+}
+
 function Input({ className, type, value, readOnly, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
@@ -429,7 +436,6 @@ function Input({ className, type, value, readOnly, ...props }: React.InputHTMLAt
   )
 }
 
-// Phone icon component
 function Phone(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -447,4 +453,5 @@ function Phone(props: React.SVGProps<SVGSVGElement>) {
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
     </svg>
   )
-} 
+}
+ 

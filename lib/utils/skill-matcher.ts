@@ -1,4 +1,4 @@
-import { Application, Position } from '@prisma/client';
+import { Application, Position, Candidate } from '@prisma/client';
 import stringSimilarity from 'string-similarity';
 
 interface MatchResult {
@@ -75,17 +75,20 @@ export function matchSkills(
 }
 
 // Function to evaluate multiple applications and return shortlisted candidates
-export async function evaluateApplications(applications: Application[], position: Position) {
+export async function evaluateApplications(
+  applications: (Application & { candidate: Candidate })[], 
+  position: Position
+) {
   // Map to store application IDs with their match scores
   const matchResults = applications.map(application => {
-    const result = matchSkills(application.skills, position);
+    const result = matchSkills(application.candidate.skills, position);
     
     return {
       applicationId: application.id,
       candidateId: application.candidateId,
-      candidateName: application.name,
-      email: application.email,
-      phone: application.phone || '',
+      candidateName: application.candidate.name,
+      email: application.candidate.email,
+      phone: application.candidate.phone || '',
       position: position.title,
       matchScore: result.matchScore,
       matchedSkills: result.matchedSkills,
@@ -96,4 +99,4 @@ export async function evaluateApplications(applications: Application[], position
   
   // Sort by match score (highest first)
   return matchResults.sort((a, b) => b.matchScore - a.matchScore);
-} 
+}

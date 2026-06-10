@@ -108,25 +108,12 @@ export async function POST(request: Request) {
     
     const application = await db.application.create({
       data: {
-        positionId: jobId, // Link the application to the position
-        positionTitle: await getPositionTitle(jobId), // Store position title directly
+        positionId: jobId,
         candidateId: candidate.id,
         resumeUrl,
         coverLetter: coverLetter || "",
-        name,
-        email,
-        phone: phone || "",
-        skills: skillsArray,
-        experience: experience || "",
         matchScore: matchScore ?? 0,
-        // Add education fields
-        tenthSchool: tenthSchool || "",
-        tenthYear: tenthYear || "",
-        tenthPercentage: tenthPercentage || "",
-        twelfthSchool: twelfthSchool || "",
-        twelfthYear: twelfthYear || "",
-        twelfthPercentage: twelfthPercentage || "",
-        userId: null, // Assuming userId is not needed for now
+        userId: null,
         analysis: {},
         status: "PENDING",
       },
@@ -184,7 +171,7 @@ export async function GET(request: Request) {
       take: 50
     });
 
-    // Transform the data to ensure consistent structure even with null relations
+    // Ensure relations are handled safely
     const transformedApplications = applications.map(app => ({
       ...app,
       position: app.position || {
@@ -194,11 +181,11 @@ export async function GET(request: Request) {
       },
       candidate: app.candidate || {
         id: "N/A",
-        name: app.name,
-        email: app.email,
-        phone: app.phone,
-        skills: app.skills,
-        experience: app.experience
+        name: "Unknown Candidate",
+        email: "N/A",
+        phone: "N/A",
+        skills: [],
+        experience: "N/A"
       }
     }));
 

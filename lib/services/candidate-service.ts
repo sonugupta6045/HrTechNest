@@ -30,6 +30,7 @@ export async function getShortlistedCandidates(): Promise<ShortlistedCandidate[]
     },
     include: {
       position: true,
+      candidate: true,
       interviews: {
         where: {
           status: "Scheduled"
@@ -45,11 +46,11 @@ export async function getShortlistedCandidates(): Promise<ShortlistedCandidate[]
   return applications.map(app => ({
     id: app.candidateId,
     applicationId: app.id,
-    name: app.name,
+    name: app.candidate.name,
     position: app.position?.title || "Unknown Position",
     positionId: app.positionId || undefined,
-    email: app.email,
-    phone: app.phone || "",
+    email: app.candidate.email,
+    phone: app.candidate.phone || "",
     status: app.status === "INTERVIEW_SCHEDULED" ? "Interview Scheduled" : 
            app.status === "SHORTLISTED" ? "Shortlisted" : 
            app.status === "REJECTED" ? "Rejected" : "Pending Review",
@@ -74,6 +75,7 @@ export async function getCandidatesByPosition(positionId: string): Promise<Short
       positionId: positionId
     },
     include: {
+      candidate: true,
       interviews: {
         where: {
           status: "Scheduled"
