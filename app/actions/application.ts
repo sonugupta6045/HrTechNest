@@ -38,6 +38,12 @@ export async function getRecentApplications() {
         select: {
           title: true
         }
+      },
+      candidate: {
+        select: {
+          name: true,
+          email: true
+        }
       }
     },
     orderBy: {
@@ -48,8 +54,8 @@ export async function getRecentApplications() {
 
   return applications.map(app => ({
     id: app.id,
-    name: app.name,
-    email: app.email,
+    name: app.candidate?.name || 'Unknown',
+    email: app.candidate?.email || 'Unknown',
     position: app.position,
     status: app.status,
     resumeUrl: app.resumeUrl,

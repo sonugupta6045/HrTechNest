@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get("status")
     
-    const where = status ? { status } : {}
+    const where = status ? { status: status as import("@prisma/client").PositionStatus } : {}
     
     const positions = await prismaClient.position.findMany({
       where,

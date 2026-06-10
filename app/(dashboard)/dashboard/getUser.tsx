@@ -10,6 +10,7 @@ export async function getUser() {
   if (!user) {
     user = await db.user.create({
       data: {
+        id: authUser.id,
         clerkId: authUser.id,
         email: authUser.emailAddresses[0].emailAddress,
         name: authUser.firstName || "User", // Default name if not provided
