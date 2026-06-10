@@ -86,20 +86,8 @@ model Application {
   matchScore        Int?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
-  email             String
-  experience        String?
-  name              String
-  phone             String?
   positionId        String?
-  skills            String[]
   analysis          Json?
-  positionTitle     String?
-  tenthSchool       String?
-  tenthYear         String?
-  tenthPercentage   String?
-  twelfthSchool     String?
-  twelfthYear       String?
-  twelfthPercentage String?
   candidate         Candidate   @relation(fields: [candidateId], references: [id])
   position          Position?   @relation(fields: [positionId], references: [id])
   user              User?       @relation(fields: [userId], references: [id])

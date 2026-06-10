@@ -137,10 +137,12 @@ export function RecentApplications() {
 
   // Filter applications based on search term and status
   const filteredApplications = applications.filter((app) => {
+    const searchLower = searchTerm.toLowerCase()
     const matchesSearch =
-      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (app.position?.title?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-      app.id.toLowerCase().includes(searchTerm.toLowerCase())
+      (app.name?.toLowerCase() || "").includes(searchLower) ||
+      (app.position?.title?.toLowerCase() || "").includes(searchLower) ||
+      (app.positionTitle?.toLowerCase() || "").includes(searchLower) ||
+      (app.id?.toString().toLowerCase() || "").includes(searchLower)
 
     const matchesStatus = statusFilter === "all" || app.status === statusFilter
 

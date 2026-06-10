@@ -35,6 +35,19 @@ export async function POST(request: Request) {
     await writeFile(tempFilePath, buffer)
 
     try {
+      // Check if python is available
+      try {
+        await execAsync("python --version")
+      } catch (err) {
+        console.warn("'python' not found, trying 'python3'")
+        try {
+          await execAsync("python3 --version")
+        } catch (err3) {
+          console.error("Python is not installed or not in PATH")
+          return fallbackParsing(file.name || "")
+        }
+      }
+
       // Get Gemini API key from environment variable
       const geminiApiKey = process.env.GEMINI_API_KEY || ""
 
@@ -45,24 +58,32 @@ export async function POST(request: Request) {
       // Only pass the API key as argument if it exists
       const apiKeyArg = geminiApiKey ? `--api_key "${geminiApiKey}"` : ""
       
-      const { stdout, stderr } = await execAsync(`python "${scriptPath}" ${filePath} ${apiKeyArg}`)
+      const pythonCmd = process.platform === 'win32' ? 'python' : 'python3'
+      
+      console.log(`Running: ${pythonCmd} "${scriptPath}" ${filePath}`)
+      
+      let stdout, stderr
+      try {
+        const result = await execAsync(`${pythonCmd} "${scriptPath}" ${filePath} ${apiKeyArg}`)
+        stdout = result.stdout
+        stderr = result.stderr
+      } catch (pythonExecError: any) {
+        console.error("Python script failed with error:", pythonExecError.message)
+        stderr = pythonExecError.stderr || ""
+        stdout = pythonExecError.stdout || ""
+      }
 
-      if (stderr && !stderr.includes("WARNING") && !stderr.includes("Using Gemini API key")) {
-        console.error("Python script error:", stderr)
-        // Try the traditional parser if Gemini parser fails
+      const hasError = stderr && !stderr.includes("WARNING") && !stderr.includes("Using Gemini API key")
+      
+      if (hasError || !stdout.trim()) {
+        console.warn("Gemini parser failed or returned empty output, trying traditional parser...")
         const fallbackScriptPath = join(process.cwd(), "scripts", "resume_parser.py")
-        const { stdout: fallbackStdout, stderr: fallbackStderr } = await execAsync(`python "${fallbackScriptPath}" ${filePath}`)
-        
-        if (fallbackStderr) {
-          console.error("Fallback parser error:", fallbackStderr)
-          return fallbackParsing(file.name || "")
-        }
-        
         try {
+          const { stdout: fallbackStdout } = await execAsync(`${pythonCmd} "${fallbackScriptPath}" ${filePath}`)
           const parsedData = JSON.parse(fallbackStdout)
           return NextResponse.json(parsedData)
-        } catch (jsonError) {
-          console.error("Failed to parse fallback script output:", jsonError)
+        } catch (fallbackError) {
+          console.error("Fallback parser failed:", fallbackError)
           return fallbackParsing(file.name || "")
         }
       }
@@ -75,29 +96,23 @@ export async function POST(request: Request) {
         console.error("Failed to parse Python script output:", jsonError)
         return fallbackParsing(file.name || "")
       }
-    } catch (pythonError) {
-      console.error("Failed to run Python script:", pythonError)
+    } catch (innerError) {
+      console.error("Internal processing error:", innerError)
       return fallbackParsing(file.name || "")
     }
   } catch (error) {
-    console.error("Error parsing resume:", error)
+    console.error("Top level parser error:", error)
     return NextResponse.json(
       { error: "Failed to parse resume", details: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     )
   } finally {
-    // Ensure file exists before attempting cleanup
     if (tempFilePath) {
       try {
-        // Use stat to check if the file exists before deleting
-        try {
-          await stat(tempFilePath) // Check file existence
-          await unlink(tempFilePath) // If file exists, delete it
-        } catch (cleanupError) {
-          console.error("Error cleaning up temporary file:", cleanupError)
-        }
-      } catch (statError) {
-        console.error("File not found during cleanup:", statError)
+        await stat(tempFilePath)
+        await unlink(tempFilePath)
+      } catch (cleanupError) {
+        // Silent cleanup error
       }
     }
   }
