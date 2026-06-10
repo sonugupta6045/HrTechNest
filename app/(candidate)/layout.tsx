@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
-import { ClientLayout } from './client-layout'
+import { CandidateClientLayout } from './client-layout'
 
-export default async function DashboardLayout({
+export default async function CandidateLayout({
   children,
 }: {
   children: React.ReactNode
@@ -20,11 +20,10 @@ export default async function DashboardLayout({
     select: { role: true }
   })
 
-  // If user is not found or is not an HR, redirect to candidate portal
-  // (In case the webhook hasn't fired yet, they might not be found, but they are a user)
-  if (!user || user.role !== 'HR') {
-    redirect('/candidate')
+  // If user is HR, redirect to HR dashboard
+  if (user?.role === 'HR') {
+    redirect('/dashboard')
   }
 
-  return <ClientLayout>{children}</ClientLayout>
+  return <CandidateClientLayout>{children}</CandidateClientLayout>
 }
