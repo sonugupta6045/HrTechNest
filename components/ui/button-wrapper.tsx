@@ -40,7 +40,7 @@ export function ButtonWrapper({
 
   return (
     <Component
-      ref={ref}
+      ref={ref as any}
       className={cn(className)}
       role={Component === 'div' ? 'button' : undefined}
       tabIndex={Component === 'div' ? 0 : undefined}

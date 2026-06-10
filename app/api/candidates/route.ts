@@ -287,7 +287,7 @@ export async function GET(req: NextRequest) {
     if (applications.length > 0) {
       console.log("First application position data:", {
         positionId: applications[0].positionId,
-        positionTitle: applications[0].positionTitle,
+        positionTitle: applications[0].position?.title,
         position: applications[0].position
       });
     }
@@ -297,7 +297,7 @@ export async function GET(req: NextRequest) {
       // Ensure position data is available
       const positionData = app.position || { 
         id: app.positionId || "unknown", 
-        title: app.positionTitle || "Unknown Position" 
+        title: "Unknown Position" 
       };
       
       return {

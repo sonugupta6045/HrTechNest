@@ -25,7 +25,7 @@ type RankedCandidate = {
   }[];
 }
 
-type DetailedCandidate = RankedCandidate & {
+type DetailedCandidate = Omit<RankedCandidate, "applications"> & {
   tenthSchool: string | null;
   tenthYear: string | null;
   twelfthSchool: string | null;
