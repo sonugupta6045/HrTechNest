@@ -25,6 +25,14 @@ model User {
   positions    Position[]
 }
 
+model SuperAdmin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Candidate {
   id                String        @id @default(cuid())
   name              String
@@ -135,6 +143,7 @@ enum PositionStatus {
 }
 
 enum Role {
+  ADMIN
   HR
   CANDIDATE
 }

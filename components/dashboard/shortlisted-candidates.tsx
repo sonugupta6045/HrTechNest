@@ -315,7 +315,7 @@ export function ShortlistedCandidates() {
     try {
       setLoading(true);
       // Change API call to fetch all candidates instead of just shortlisted
-      let url = "/api/candidates";
+      let url = "/api/hr/candidates";
       
       if (selectedPosition !== "all") {
         url += `?positionId=${selectedPosition}`;
@@ -397,7 +397,7 @@ export function ShortlistedCandidates() {
 
   const fetchPositions = async () => {
     try {
-      const response = await fetch("/api/positions?status=OPEN");
+      const response = await fetch("/api/hr/positions?status=OPEN");
       
       if (!response.ok) {
         throw new Error("Failed to fetch positions");
@@ -467,7 +467,7 @@ export function ShortlistedCandidates() {
 
       // Add try/catch specifically for the API call
       try {
-        const response = await fetch("/api/candidates", {
+        const response = await fetch("/api/hr/candidates", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -543,7 +543,7 @@ export function ShortlistedCandidates() {
       }
       
       // Only fetch from API if we don't have the resumeUrl locally
-      const response = await fetch(`/api/candidates/resume?candidateId=${candidateId}`);
+      const response = await fetch(`/api/hr/candidates/resume?candidateId=${candidateId}`);
       
       if (!response.ok) {
         console.error(`Failed to get resume URL: ${response.status}`);
@@ -595,7 +595,7 @@ export function ShortlistedCandidates() {
   const handleShortlist = async (applicationId: string) => {
     try {
       setUpdatingStatus(applicationId);
-      const response = await fetch("/api/candidates/shortlist", {
+      const response = await fetch("/api/hr/candidates/shortlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -629,7 +629,7 @@ export function ShortlistedCandidates() {
   const handleReject = async (applicationId: string) => {
     try {
       setUpdatingStatus(applicationId);
-      const response = await fetch("/api/candidates/reject", {
+      const response = await fetch("/api/hr/candidates/reject", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

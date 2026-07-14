@@ -101,7 +101,7 @@ export function RecentApplications() {
     const fetchApplications = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('/api/applications')
+        const response = await fetch('/api/hr/applications')
         if (!response.ok) {
           throw new Error('Failed to fetch applications')
         }

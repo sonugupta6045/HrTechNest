@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
+import { verifyRole } from "@/lib/auth-utils";
 
 const prisma = new PrismaClient();
 
 // GET /api/interviews/list - get all interviews
 export async function GET(req: NextRequest) {
   try {
-    const { userId } = await auth();
+    const { isAuthorized } = await verifyRole(['HR', 'ADMIN']);
     
-    if (!userId) {
+    if (!isAuthorized) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

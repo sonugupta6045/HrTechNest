@@ -55,7 +55,7 @@ export function ApplicationsDashboard() {
   const fetchApplications = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/applications?status=${statusFilter}&sortBy=${sortBy}`)
+      const response = await fetch(`/api/hr/applications?status=${statusFilter}&sortBy=${sortBy}`)
       if (!response.ok) {
         throw new Error("Failed to fetch applications")
       }
@@ -72,7 +72,7 @@ export function ApplicationsDashboard() {
 
   const handleStatusChange = async (applicationId: string, newStatus: string) => {
     try {
-      const response = await fetch(`/api/applications/${applicationId}`, {
+      const response = await fetch(`/api/hr/applications/${applicationId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

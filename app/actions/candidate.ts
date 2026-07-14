@@ -48,10 +48,27 @@ type DetailedCandidate = Omit<RankedCandidate, "applications"> & {
   }[];
 };
 
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
+
 export async function getCandidatesWithRankings() {
   const { userId } = await auth();
   
+  // Check for admin token if no clerk user
+  let isSuperAdmin = false;
   if (!userId) {
+    const adminToken = cookies().get('admin_token')?.value;
+    if (adminToken) {
+      try {
+        const decoded = jwt.decode(adminToken) as any;
+        if (decoded?.role === 'SUPER_ADMIN') {
+          isSuperAdmin = true;
+        }
+      } catch (e) {}
+    }
+  }
+  
+  if (!userId && !isSuperAdmin) {
     throw new Error("Unauthorized");
   }
 
@@ -71,8 +88,8 @@ export async function getCandidatesWithRankings() {
 
   // Get all positions to use for skill matching
   const positions = await prisma.position.findMany({
-    where: {
-      userId: userId
+    where: isSuperAdmin ? undefined : {
+      userId: userId!
     }
   });
 
@@ -195,7 +212,21 @@ export async function getCandidatesWithRankings() {
 export async function getCandidateWithRanking(candidateId: string): Promise<DetailedCandidate | null> {
   const { userId } = await auth();
   
+  // Check for admin token if no clerk user
+  let isSuperAdmin = false;
   if (!userId) {
+    const adminToken = cookies().get('admin_token')?.value;
+    if (adminToken) {
+      try {
+        const decoded = jwt.decode(adminToken) as any;
+        if (decoded?.role === 'SUPER_ADMIN') {
+          isSuperAdmin = true;
+        }
+      } catch (e) {}
+    }
+  }
+  
+  if (!userId && !isSuperAdmin) {
     throw new Error("Unauthorized");
   }
 
@@ -230,8 +261,8 @@ export async function getCandidateWithRanking(candidateId: string): Promise<Deta
 
   // Get all positions to find the best match
   const positions = await prisma.position.findMany({
-    where: {
-      userId: userId
+    where: isSuperAdmin ? undefined : {
+      userId: userId!
     }
   });
 

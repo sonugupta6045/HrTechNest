@@ -1,26 +1,30 @@
-import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
-import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
+import jwt from 'jsonwebtoken'
+import { redirect } from 'next/navigation'
 
 export default async function AdminUsersPage() {
-  const { userId } = await auth()
-
-  if (!userId) {
-    redirect('/sign-in')
+  const cookieStore = cookies()
+  const token = cookieStore.get('admin_token')?.value
+  
+  if (!token) {
+    redirect('/admin/login')
   }
 
-  // Double check HR role
-  const currentUser = await db.user.findUnique({
-    where: { clerkId: userId }
-  })
-
-  if (currentUser?.role !== 'HR') {
-    redirect('/candidate')
+  let callerId = '';
+  try {
+    const decoded = jwt.decode(token) as any
+    callerId = decoded?.id
+    if (!decoded || decoded.role !== 'SUPER_ADMIN') {
+      redirect('/admin/login')
+    }
+  } catch (e) {
+    redirect('/admin/login')
   }
 
   const users = await db.user.findMany({
@@ -29,15 +33,22 @@ export default async function AdminUsersPage() {
 
   async function upgradeToHR(targetUserId: string) {
     'use server'
-    
-    // Verify admin calling this is HR
-    const authData = await auth()
-    const callerId = authData.userId
-    
-    if (!callerId) return;
 
-    const caller = await db.user.findUnique({ where: { clerkId: callerId } })
-    if (caller?.role !== 'HR') return;
+    const cookieStore = cookies()
+    const token = cookieStore.get('admin_token')?.value
+    if (!token) return
+    
+    let adminId = '';
+    try {
+      const decoded = jwt.decode(token) as any
+      adminId = decoded?.id
+      if (!decoded || decoded.role !== 'SUPER_ADMIN') return;
+    } catch (e) {
+      return;
+    }
+
+    const caller = await db.superAdmin.findUnique({ where: { id: adminId } })
+    if (!caller) return;
 
     await db.user.update({
       where: { id: targetUserId },
@@ -82,17 +93,20 @@ export default async function AdminUsersPage() {
                   </TableCell>
                   <TableCell>{new Date(u.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
-                    {u.role !== 'HR' && (
+                    {u.role !== 'HR' && u.role !== 'ADMIN' && (
                       <form action={upgradeToHR.bind(null, u.id)}>
                         <Button type="submit" variant="outline" size="sm">
                           Make HR
                         </Button>
                       </form>
                     )}
-                    {u.role === 'HR' && u.clerkId !== userId && (
+                    {u.role === 'HR' && (
                        <Button disabled variant="outline" size="sm" className="opacity-50">
                          HR Admin
                        </Button>
+                    )}
+                    {u.role === 'ADMIN' && (
+                       <Badge variant="default" className="bg-amber-600 hover:bg-amber-700">Super Admin</Badge>
                     )}
                   </TableCell>
                 </TableRow>

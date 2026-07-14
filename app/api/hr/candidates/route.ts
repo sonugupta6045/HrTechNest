@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { auth, currentUser } from "@clerk/nextjs/server"
+import { verifyRole } from "@/lib/auth-utils"
 
 import { Interview } from "@prisma/client";
 
@@ -241,6 +242,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // Secure the endpoint - only HR and ADMIN can view all candidates
+    const { isAuthorized } = await verifyRole(['HR', 'ADMIN']);
+    if (!isAuthorized) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(req.url)
     const positionId = searchParams.get("positionId")
     const status = searchParams.get("status")

@@ -182,7 +182,7 @@ export default function ApplyPage({ params }: { params: Promise<{ id: string }> 
 
       console.log("Submitting application data:", applicationData)
 
-      const response = await fetch("/api/applications", {
+      const response = await fetch("/api/candidate/applications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

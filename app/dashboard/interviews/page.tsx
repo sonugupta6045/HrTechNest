@@ -46,7 +46,7 @@ function InterviewDetails() {
   const fetchInterviewById = async (id: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/interviews?id=${id}`)
+      const response = await fetch(`/api/hr/interviews?id=${id}`)
       
       if (!response.ok) {
         throw new Error("Failed to fetch interview details")
@@ -67,7 +67,7 @@ function InterviewDetails() {
   const fetchInterviewByApplication = async (appId: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/interviews/list`)
+      const response = await fetch(`/api/hr/interviews/list`)
       
       if (!response.ok) {
         throw new Error("Failed to fetch interviews")
@@ -96,7 +96,7 @@ function InterviewDetails() {
       if (!interview?.id) return
       
       setSavingNotes(true)
-      const response = await fetch("/api/interviews", {
+      const response = await fetch("/api/hr/interviews", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -134,7 +134,7 @@ function InterviewDetails() {
       if (!interview?.id) return
       
       setUpdatingStatus(true)
-      const response = await fetch("/api/interviews", {
+      const response = await fetch("/api/hr/interviews", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -171,7 +171,7 @@ function InterviewDetails() {
     if (!interview?.candidate?.id) return
     
     try {
-      const response = await fetch(`/api/candidates/resume?candidateId=${interview.candidate.id}`)
+      const response = await fetch(`/api/hr/candidates/resume?candidateId=${interview.candidate.id}`)
       
       if (!response.ok) {
         throw new Error("Failed to get resume URL")

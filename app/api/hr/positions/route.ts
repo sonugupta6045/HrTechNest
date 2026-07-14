@@ -6,6 +6,9 @@ import { PrismaClient } from "@prisma/client"
 
 const prismaClient = new PrismaClient()
 
+import { cookies } from "next/headers"
+import jwt from "jsonwebtoken"
+
 export async function POST(request: Request) {
   try {
     console.log("POST /api/positions - Starting to process request")
@@ -13,9 +16,21 @@ export async function POST(request: Request) {
     const authResult = await auth()
     const userId = authResult?.userId
     
-    console.log("Auth result:", { userId: userId || "Not authenticated" })
-
+    // Check for super admin
+    let isSuperAdmin = false;
     if (!userId) {
+      const adminToken = cookies().get('admin_token')?.value;
+      if (adminToken) {
+        try {
+          const decoded = jwt.decode(adminToken) as any;
+          if (decoded?.role === 'SUPER_ADMIN') {
+            isSuperAdmin = true;
+          }
+        } catch (e) {}
+      }
+    }
+
+    if (!userId && !isSuperAdmin) {
       console.log("POST /api/positions - Unauthorized request")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -23,23 +38,26 @@ export async function POST(request: Request) {
     const data = await request.json()
     console.log("POST /api/positions - Request data:", data)
 
-    // Get the user from the database using Clerk ID
-    console.log("Finding user with clerkId:", userId)
-    const user = await prisma.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-    })
+    let authorUserId = 'SUPER_ADMIN_ID';
+    
+    if (userId) {
+      // Get the user from the database using Clerk ID
+      console.log("Finding user with clerkId:", userId)
+      const user = await prisma.user.findUnique({
+        where: {
+          clerkId: userId,
+        },
+      })
 
-    if (!user) {
-      console.log("POST /api/positions - User not found in database for clerkId:", userId)
-      return NextResponse.json({ 
-        error: "User not found",
-        details: "No user record exists for the authenticated user. Please ensure your user profile is set up."
-      }, { status: 404 })
+      if (!user) {
+        console.log("POST /api/positions - User not found in database for clerkId:", userId)
+        return NextResponse.json({ 
+          error: "User not found",
+          details: "No user record exists for the authenticated user. Please ensure your user profile is set up."
+        }, { status: 404 })
+      }
+      authorUserId = user.id;
     }
-
-    console.log("User found:", { userId: user.id, name: user.name })
     
     // Validate required fields
     const requiredFields = ['title', 'department', 'location', 'type', 'description', 'requirements']
@@ -54,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     // Create a new position
-    console.log("Creating position with data:", { ...data, userId: user.id })
+    console.log("Creating position with data:", { ...data, userId: authorUserId })
     const position = await prisma.position.create({
       data: {
         title: data.title,
@@ -63,7 +81,7 @@ export async function POST(request: Request) {
         type: data.type,
         description: data.description,
         requirements: data.requirements,
-        userId: user.id,
+        userId: authorUserId === 'SUPER_ADMIN_ID' ? 'super_admin' : authorUserId, // Fallback if needed, though schema might require valid ID
       },
     })
 

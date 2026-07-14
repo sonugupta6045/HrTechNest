@@ -35,7 +35,7 @@ export default function InterviewsListPage() {
   const fetchInterviews = async () => {
     try {
       setLoading(true)
-      let url = "/api/interviews/list"
+      let url = "/api/hr/interviews/list"
       
       const params = new URLSearchParams()
       
@@ -79,7 +79,7 @@ export default function InterviewsListPage() {
 
   const fetchPositions = async () => {
     try {
-      const response = await fetch("/api/positions")
+      const response = await fetch("/api/hr/positions")
       
       if (!response.ok) {
         throw new Error("Failed to fetch positions")

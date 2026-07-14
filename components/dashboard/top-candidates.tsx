@@ -147,7 +147,7 @@ export function TopCandidates() {
   const fetchCandidates = async () => {
     setIsLoading(true);
     try {
-      let url = "/api/candidates";
+      let url = "/api/hr/candidates";
       if (positionFilter !== "all") {
         url += `?positionId=${positionFilter}`;
       }
@@ -196,7 +196,7 @@ export function TopCandidates() {
       
       if (uniquePositions.length > 0) {
         // Fetch position details
-        const positionResponse = await fetch("/api/positions");
+        const positionResponse = await fetch("/api/hr/positions");
         if (positionResponse.ok) {
           const positionData = await positionResponse.json();
           setPositions(
@@ -246,7 +246,7 @@ export function TopCandidates() {
       // Combine date and time into a single Date object
       const scheduledFor = new Date(`${interviewDate}T${interviewTime}`);
       
-      const response = await fetch("/api/candidates", {
+      const response = await fetch("/api/hr/candidates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
