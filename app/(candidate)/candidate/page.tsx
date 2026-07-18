@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@/lib/db'
+import { prisma as db } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CalendarIcon, BriefcaseIcon, MapPinIcon } from 'lucide-react'
@@ -16,6 +16,7 @@ export default async function CandidateDashboard() {
   const candidate = await db.candidate.findUnique({
     where: { userId },
     include: {
+      user: true,
       applications: {
         include: {
           position: true,
@@ -44,7 +45,7 @@ export default async function CandidateDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Welcome, {candidate.name.split(' ')[0]}</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Welcome, {candidate.user?.name.split(' ')[0]}</h2>
         <p className="text-muted-foreground">Here is the status of your recent applications.</p>
       </div>
 

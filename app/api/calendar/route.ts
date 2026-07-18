@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
             position: true,
           },
         },
-        candidate: true,
+        candidate: { include: { user: true } },
       },
       orderBy: {
         scheduledFor: 'asc',
@@ -48,10 +48,10 @@ export async function GET(req: NextRequest) {
     // Format the data for calendar display
     const formattedInterviews = interviews.map(interview => ({
       id: interview.id,
-      title: `Interview: ${interview.candidate.name}`,
+      title: `Interview: ${interview.candidate.user?.name}`,
       positionTitle: interview.application.position?.title || "Position",
-      candidateName: interview.candidate.name,
-      candidateEmail: interview.candidate.email,
+      candidateName: interview.candidate.user?.name,
+      candidateEmail: interview.candidate.user?.email,
       start: interview.scheduledFor,
       end: new Date(new Date(interview.scheduledFor).getTime() + interview.duration * 60000),
       duration: interview.duration,

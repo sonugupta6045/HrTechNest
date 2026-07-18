@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@/lib/db'
+import { prisma as db } from '@/lib/prisma'
 import { ClientLayout } from './client-layout'
 
 export default async function DashboardLayout({
@@ -20,9 +20,9 @@ export default async function DashboardLayout({
     select: { role: true }
   })
 
-  // If user is not found or is not an HR, redirect to candidate portal
+  // If user is not found or is not an HR/ADMIN, redirect to candidate portal
   // (In case the webhook hasn't fired yet, they might not be found, but they are a user)
-  if (!user || user.role !== 'HR') {
+  if (!user || (user.role !== 'HR' && user.role !== 'ADMIN')) {
     redirect('/candidate')
   }
 

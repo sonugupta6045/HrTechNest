@@ -85,18 +85,18 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
             <div className="flex flex-col items-center text-center">
               <Avatar className="h-24 w-24 mb-4">
                 <AvatarFallback className="text-xl">
-                  {getInitials(candidate.name)}
+                  {getInitials(candidate.user?.name)}
                 </AvatarFallback>
               </Avatar>
-              <h2 className="text-xl font-bold">{candidate.name}</h2>
+              <h2 className="text-xl font-bold">{candidate.user?.name}</h2>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>{candidate.email}</span>
+                <span>{candidate.user?.email}</span>
               </div>
-              {candidate.phone && (
+              {candidate.user?.phone && (
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Phone className="h-4 w-4" />
-                  <span>{candidate.phone}</span>
+                  <span>{candidate.user?.phone}</span>
                 </div>
               )}
             </div>

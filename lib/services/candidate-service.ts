@@ -46,11 +46,11 @@ export async function getShortlistedCandidates(): Promise<ShortlistedCandidate[]
   return applications.map(app => ({
     id: app.candidateId,
     applicationId: app.id,
-    name: app.candidate.name,
+    name: app.candidate.user?.name,
     position: app.position?.title || "Unknown Position",
     positionId: app.positionId || undefined,
-    email: app.candidate.email,
-    phone: app.candidate.phone || "",
+    email: app.candidate.user?.email,
+    phone: app.candidate.user?.phone || "",
     status: app.status === "INTERVIEW_SCHEDULED" ? "Interview Scheduled" : 
            app.status === "SHORTLISTED" ? "Shortlisted" : 
            app.status === "REJECTED" ? "Rejected" : "Pending Review",
@@ -157,7 +157,7 @@ export async function scheduleInterviews(
       if (useGoogleCalendar) {
         try {
           // Get all candidate emails for the event
-          const attendeeEmails = applications.map(app => app.candidate.email);
+          const attendeeEmails = applications.map(app => app.candidate.user?.email);
           
           // Add unique position titles to make the event title
           const positionTitles = Array.from(new Set(applications.map(app => app.position?.title)));
@@ -239,11 +239,11 @@ export async function scheduleInterviews(
         // Queue email instead of sending it now
         if (sendNotification) {
           notificationQueue.push({
-            email: app.candidate.email,
+            email: app.candidate.user?.email,
             subject: `Interview Scheduled for ${app.position?.title}`,
             html: `
               <h1>Interview Scheduled</h1>
-              <p>Dear ${app.candidate?.name || 'Candidate'},</p>
+              <p>Dear ${app.candidate?.user?.name || 'Candidate'},</p>
               <p>Your interview for the <strong>${app.position?.title}</strong> position has been scheduled for:</p>
               <p><strong>Date and Time:</strong> ${scheduledFor.toLocaleString()}</p>
               <p><strong>Duration:</strong> ${duration} minutes</p>

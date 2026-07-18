@@ -147,7 +147,7 @@ export function TopCandidates() {
   const fetchCandidates = async () => {
     setIsLoading(true);
     try {
-      let url = "/api/candidates";
+      let url = "/api/hr/candidates?limit=1000";
       if (positionFilter !== "all") {
         url += `?positionId=${positionFilter}`;
       }
@@ -157,7 +157,8 @@ export function TopCandidates() {
         throw new Error("Failed to fetch candidates");
       }
       
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data;
       console.log("API Response:", data); // Log the response for debugging
       console.log("Fetched data:", data);
 
@@ -174,13 +175,13 @@ export function TopCandidates() {
         
         return {
           id: item.candidate.id,
-          name: item.candidate.name,
+          name: item.candidate.user?.name,
           position: positionTitle,
           matchScore: item.application.matchScore || 0,
           skills: item.candidate.skills || [],
           experience: item.candidate.experience || "Not specified",
-          email: item.candidate.email,
-          phone: item.candidate.phone,
+          email: item.candidate.user?.email,
+          phone: item.candidate.user?.phone,
           status: item.application.status,
           applicationId: item.application.id,
           positionId: positionId,
@@ -196,7 +197,7 @@ export function TopCandidates() {
       
       if (uniquePositions.length > 0) {
         // Fetch position details
-        const positionResponse = await fetch("/api/positions");
+        const positionResponse = await fetch("/api/hr/positions");
         if (positionResponse.ok) {
           const positionData = await positionResponse.json();
           setPositions(
@@ -246,7 +247,7 @@ export function TopCandidates() {
       // Combine date and time into a single Date object
       const scheduledFor = new Date(`${interviewDate}T${interviewTime}`);
       
-      const response = await fetch("/api/candidates", {
+      const response = await fetch("/api/hr/candidates", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

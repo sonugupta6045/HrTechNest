@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { writeFile, unlink, stat } from "fs/promises"
+import { auth } from "@clerk/nextjs/server"
 import { exec } from "child_process"
 import { promisify } from "util"
 import { join } from "path"
@@ -10,6 +11,11 @@ const execAsync = promisify(exec)
 export async function POST(request: Request) {
   let tempFilePath = ""
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File
 
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
       
       let stdout, stderr
       try {
-        const result = await execAsync(`${pythonCmd} "${scriptPath}" ${filePath} ${apiKeyArg}`)
+        const result = await execAsync(`${pythonCmd} "${scriptPath}" ${filePath} ${apiKeyArg}`, { maxBuffer: 10 * 1024 * 1024 })
         stdout = result.stdout
         stderr = result.stderr
       } catch (pythonExecError: any) {
@@ -79,7 +85,7 @@ export async function POST(request: Request) {
         console.warn("Gemini parser failed or returned empty output, trying traditional parser...")
         const fallbackScriptPath = join(process.cwd(), "scripts", "resume_parser.py")
         try {
-          const { stdout: fallbackStdout } = await execAsync(`${pythonCmd} "${fallbackScriptPath}" ${filePath}`)
+          const { stdout: fallbackStdout } = await execAsync(`${pythonCmd} "${fallbackScriptPath}" ${filePath}`, { maxBuffer: 10 * 1024 * 1024 })
           const parsedData = JSON.parse(fallbackStdout)
           return NextResponse.json(parsedData)
         } catch (fallbackError) {

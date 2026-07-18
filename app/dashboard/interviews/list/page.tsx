@@ -35,7 +35,7 @@ export default function InterviewsListPage() {
   const fetchInterviews = async () => {
     try {
       setLoading(true)
-      let url = "/api/interviews/list"
+      let url = "/api/hr/interviews/list"
       
       const params = new URLSearchParams()
       
@@ -79,7 +79,7 @@ export default function InterviewsListPage() {
 
   const fetchPositions = async () => {
     try {
-      const response = await fetch("/api/positions")
+      const response = await fetch("/api/hr/positions")
       
       if (!response.ok) {
         throw new Error("Failed to fetch positions")
@@ -127,8 +127,8 @@ export default function InterviewsListPage() {
     const position = interview.application?.position
 
     return (
-      candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      candidate.user?.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (position?.title && position.title.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   })
@@ -243,8 +243,8 @@ export default function InterviewsListPage() {
                 >
                   <TableCell>
                     <div>
-                      <p className="font-medium">{interview.candidate.name}</p>
-                      <p className="text-sm text-muted-foreground">{interview.candidate.email}</p>
+                      <p className="font-medium">{interview.candidate.user?.name}</p>
+                      <p className="text-sm text-muted-foreground">{interview.candidate.user?.email}</p>
                     </div>
                   </TableCell>
                   <TableCell>{interview.application?.position?.title || "Unknown Position"}</TableCell>

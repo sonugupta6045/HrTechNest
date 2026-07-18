@@ -41,8 +41,12 @@ export async function getRecentApplications() {
       },
       candidate: {
         select: {
-          name: true,
-          email: true
+          user: {
+            select: {
+              name: true,
+              email: true
+            }
+          }
         }
       }
     },
@@ -54,8 +58,8 @@ export async function getRecentApplications() {
 
   return applications.map(app => ({
     id: app.id,
-    name: app.candidate?.name || 'Unknown',
-    email: app.candidate?.email || 'Unknown',
+    name: app.candidate?.user?.name || 'Unknown',
+    email: app.candidate?.user?.email || 'Unknown',
     position: app.position,
     status: app.status,
     resumeUrl: app.resumeUrl,

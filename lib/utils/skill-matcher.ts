@@ -86,9 +86,9 @@ export async function evaluateApplications(
     return {
       applicationId: application.id,
       candidateId: application.candidateId,
-      candidateName: application.candidate.name,
-      email: application.candidate.email,
-      phone: application.candidate.phone || '',
+      candidateName: application.candidate.user?.name,
+      email: application.candidate.user?.email,
+      phone: application.candidate.user?.phone || '',
       position: position.title,
       matchScore: result.matchScore,
       matchedSkills: result.matchedSkills,

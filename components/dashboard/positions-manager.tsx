@@ -159,7 +159,7 @@ export function PositionsManager() {
     const fetchPositions = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch('/api/positions')
+        const response = await fetch('/api/hr/positions')
         
         if (!response.ok) {
           throw new Error('Failed to fetch positions')
@@ -202,7 +202,7 @@ export function PositionsManager() {
       
       // Try to initialize the user first to ensure we have a user record
       console.log("Initializing user record...")
-      const initResponse = await fetch('/api/init-user', {
+      const initResponse = await fetch('/api/hr/init-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,7 +216,7 @@ export function PositionsManager() {
       }
       
       // Call the API to create a new position
-      const response = await fetch('/api/positions', {
+      const response = await fetch('/api/hr/positions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -293,7 +293,7 @@ export function PositionsManager() {
       
       // Try to initialize the user first to ensure we have a user record
       console.log("Initializing user record...")
-      const initResponse = await fetch('/api/init-user', {
+      const initResponse = await fetch('/api/hr/init-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ export function PositionsManager() {
       }
       
       // Call API to update the position
-      const response = await fetch(`/api/positions/${currentPosition.id}`, {
+      const response = await fetch(`/api/hr/positions/${currentPosition.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -385,7 +385,7 @@ export function PositionsManager() {
       }
       
       // Call API to update position status
-      const response = await fetch(`/api/positions/${id}`, {
+      const response = await fetch(`/api/hr/positions/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

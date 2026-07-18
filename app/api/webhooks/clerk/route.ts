@@ -1,7 +1,7 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
-import { db } from '@/lib/db'
+import { prisma as db } from '@/lib/prisma'
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -78,8 +78,6 @@ export async function POST(req: Request) {
         await db.candidate.create({
           data: {
             userId: newUser.id,
-            email: primaryEmail,
-            name: name,
           }
         });
         
@@ -115,9 +113,15 @@ export async function POST(req: Request) {
 
     try {
       if (id) {
-        await db.user.delete({
-          where: { clerkId: id }
-        });
+        const user = await db.user.findUnique({ where: { clerkId: id } });
+        if (user) {
+          // Delete associated candidate profile first to avoid foreign key constraint errors
+          await db.candidate.delete({ where: { userId: user.id } }).catch(() => {});
+          
+          await db.user.delete({
+            where: { clerkId: id }
+          });
+        }
       }
     } catch (error) {
       console.error('Error deleting user in db:', error)
