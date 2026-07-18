@@ -1,5 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
+import { prisma as db } from "@/lib/prisma";
 
 export async function getUser() {
   const authUser = await currentUser();

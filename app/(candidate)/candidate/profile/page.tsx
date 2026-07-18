@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@/lib/db'
+import { prisma as db } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,7 +13,8 @@ export default async function CandidateProfilePage() {
   }
 
   const candidate = await db.candidate.findFirst({
-    where: { userId }
+    where: { userId },
+    include: { user: true }
   })
 
   if (!candidate) {
@@ -45,7 +46,7 @@ export default async function CandidateProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium leading-none">Email Address</p>
-                <p className="text-sm text-muted-foreground mt-1">{candidate.email}</p>
+                <p className="text-sm text-muted-foreground mt-1">{candidate.user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -54,7 +55,7 @@ export default async function CandidateProfilePage() {
               </div>
               <div>
                 <p className="text-sm font-medium leading-none">Phone Number</p>
-                <p className="text-sm text-muted-foreground mt-1">{candidate.phone || 'Not provided'}</p>
+                <p className="text-sm text-muted-foreground mt-1">{candidate.user?.phone || 'Not provided'}</p>
               </div>
             </div>
           </CardContent>

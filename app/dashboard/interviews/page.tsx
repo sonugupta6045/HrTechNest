@@ -348,18 +348,18 @@ function InterviewDetails() {
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-xl font-bold">{candidate.name}</h3>
+                  <h3 className="text-xl font-bold">{candidate.user?.name}</h3>
                   <p className="text-muted-foreground">{position?.title || "Unknown Position"}</p>
                   
                   <div className="mt-4 space-y-2">
                     <p className="flex items-center">
                       <Mail className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {candidate.email}
+                      {candidate.user?.email}
                     </p>
-                    {candidate.phone && (
+                    {candidate.user?.phone && (
                       <p className="flex items-center">
                         <Phone className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {candidate.phone}
+                        {candidate.user?.phone}
                       </p>
                     )}
                   </div>
@@ -370,7 +370,7 @@ function InterviewDetails() {
                     <FileText className="mr-2 h-4 w-4" />
                     View Resume
                   </Button>
-                  <Button variant="outline" onClick={() => window.location.href = `mailto:${candidate.email}`}>
+                  <Button variant="outline" onClick={() => window.location.href = `mailto:${candidate.user?.email}`}>
                     <Mail className="mr-2 h-4 w-4" />
                     Send Email
                   </Button>

@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
             position: true,
           },
         },
-        candidate: true,
+        candidate: { include: { user: true } },
         scheduler: {
           select: {
             name: true,

@@ -139,13 +139,13 @@ function createMailTransport(accessToken) {
 async function sendTestEmail(transport, candidate) {
   const mailOptions = {
     from: `Recruitment Team <${SENDER_EMAIL}>`,
-    to: candidate.email,
+    to: candidate.user?.email,
     subject: 'API Test: Your Application Status',
-    text: `Dear ${candidate.name},\n\nThis is a test email to verify our email notification system. Please ignore this message.\n\nBest regards,\nRecruitment Team`,
+    text: `Dear ${candidate.user?.name},\n\nThis is a test email to verify our email notification system. Please ignore this message.\n\nBest regards,\nRecruitment Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
         <h2 style="color: #333;">API Test: Your Application Status</h2>
-        <p>Dear ${candidate.name},</p>
+        <p>Dear ${candidate.user?.name},</p>
         <p>This is a test email to verify our email notification system. Please ignore this message.</p>
         <p style="margin-top: 20px;">Best regards,<br>Recruitment Team</p>
       </div>
@@ -159,13 +159,13 @@ async function sendTestEmail(transport, candidate) {
 async function sendEmailWithAttachment(transport, candidate, attachmentPath) {
   const mailOptions = {
     from: `Recruitment Team <${SENDER_EMAIL}>`,
-    to: candidate.email,
+    to: candidate.user?.email,
     subject: 'API Test: Your Interview Details',
-    text: `Dear ${candidate.name},\n\nThis is a test email with attachment to verify our email notification system. Please ignore this message.\n\nBest regards,\nRecruitment Team`,
+    text: `Dear ${candidate.user?.name},\n\nThis is a test email with attachment to verify our email notification system. Please ignore this message.\n\nBest regards,\nRecruitment Team`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
         <h2 style="color: #333;">API Test: Your Interview Details</h2>
-        <p>Dear ${candidate.name},</p>
+        <p>Dear ${candidate.user?.name},</p>
         <p>This is a test email with attachment to verify our email notification system. Please ignore this message.</p>
         <p style="margin-top: 20px;">Best regards,<br>Recruitment Team</p>
       </div>

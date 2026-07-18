@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
-import { db } from '@/lib/db'
+import { prisma as db } from '@/lib/prisma'
 import { CandidateClientLayout } from './client-layout'
 
 export default async function CandidateLayout({

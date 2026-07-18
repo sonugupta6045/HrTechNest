@@ -6,7 +6,7 @@ import { TopCandidates } from "@/components/dashboard/top-candidates";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
-import { db } from "@/lib/db";
+import { prisma as db } from "@/lib/prisma";
 
 export default async function DashboardPage() {
   const authUser = await currentUser();

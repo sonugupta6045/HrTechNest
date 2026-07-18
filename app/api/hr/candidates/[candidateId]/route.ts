@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
+import { verifyRole } from "@/lib/auth-utils";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { candidateId: string } }
 ) {
   try {
-    const { userId } = await auth();
-    console.log(userId)
-    if (!userId) {
+    const { isAuthorized } = await verifyRole(['HR', 'ADMIN']);
+    if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

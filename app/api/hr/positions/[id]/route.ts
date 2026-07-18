@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import prisma from "@/lib/prisma"
+import { verifyRole } from "@/lib/auth-utils"
 
 export async function PATCH(
   request: Request,
@@ -10,12 +11,11 @@ export async function PATCH(
     const id = params.id
     console.log(`PATCH /api/positions/${id} - Starting to process request`)
     
-    const authResult = await auth()
-    const userId = authResult?.userId
+    const { isAuthorized, userId } = await verifyRole(['HR', 'ADMIN']);
     
     console.log("Auth result:", { userId: userId || "Not authenticated" })
 
-    if (!userId) {
+    if (!isAuthorized || !userId) {
       console.log(`PATCH /api/positions/${id} - Unauthorized request`)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -26,21 +26,24 @@ export async function PATCH(
 
     // Get the user from the database using Clerk ID
     console.log("Finding user with clerkId:", userId)
-    const user = await prisma.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-    })
+    if (userId !== 'SUPER_ADMIN') {
+      const user = await prisma.user.findUnique({
+        where: {
+          clerkId: userId,
+        },
+      })
 
-    if (!user) {
-      console.log(`PATCH /api/positions/${id} - User not found in database for clerkId:`, userId)
-      return NextResponse.json({ 
-        error: "User not found",
-        details: "No user record exists for the authenticated user."
-      }, { status: 404 })
+      if (!user) {
+        console.log(`PATCH /api/positions/${id} - User not found in database for clerkId:`, userId)
+        return NextResponse.json({ 
+          error: "User not found",
+          details: "No user record exists for the authenticated user."
+        }, { status: 404 })
+      }
+      console.log("User found:", { userId: user.id, name: user.name })
+    } else {
+      console.log("User is SUPER_ADMIN");
     }
-
-    console.log("User found:", { userId: user.id, name: user.name })
 
     // Check if the position exists
     console.log(`Finding position with id: ${positionId}`)
@@ -115,23 +118,24 @@ export async function DELETE(
 ) {
   try {
     const id = params.id
-    const { userId } = await auth()
+    const { isAuthorized, userId } = await verifyRole(['HR', 'ADMIN']);
 
-    if (!userId) {
+    if (!isAuthorized || !userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const positionId = id
 
-    // Get the user from the database using Clerk ID
-    const user = await prisma.user.findUnique({
-      where: {
-        clerkId: userId,
-      },
-    })
+    if (userId !== 'SUPER_ADMIN') {
+      const user = await prisma.user.findUnique({
+        where: {
+          clerkId: userId,
+        },
+      })
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
     }
 
     // Check if the position exists and belongs to the user

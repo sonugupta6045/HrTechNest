@@ -46,22 +46,25 @@ export function ApplicationsDashboard() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("matchScore")
+  const [sortBy, setSortBy] = useState("createdAt")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
 
   useEffect(() => {
     fetchApplications()
-  }, [statusFilter, sortBy])
+  }, [statusFilter, sortBy, currentPage])
 
   const fetchApplications = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/hr/applications?status=${statusFilter}&sortBy=${sortBy}`)
+      const response = await fetch(`/api/hr/applications?status=${statusFilter}&sortBy=${sortBy}&page=${currentPage}&limit=10`)
       if (!response.ok) {
         throw new Error("Failed to fetch applications")
       }
       const data = await response.json()
       console.log("Fetched applications for dashboard:", data)
-      setApplications(data)
+      setApplications(data.data)
+      setTotalPages(data.metadata.totalPages || 1)
     } catch (error) {
       console.error("Error fetching applications:", error)
       toast.error("Failed to fetch applications")
@@ -238,6 +241,24 @@ export function ApplicationsDashboard() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex items-center justify-between mt-4">
+        <Button 
+          disabled={currentPage === 1} 
+          onClick={() => setCurrentPage(p => p - 1)}
+          variant="outline"
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+        <Button 
+          disabled={currentPage >= totalPages} 
+          onClick={() => setCurrentPage(p => p + 1)}
+          variant="outline"
+        >
+          Next
+        </Button>
       </div>
     </div>
   )

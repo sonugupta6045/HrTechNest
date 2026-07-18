@@ -51,7 +51,7 @@ type DetailedCandidate = Omit<RankedCandidate, "applications"> & {
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-export async function getCandidatesWithRankings() {
+export async function getCandidatesWithRankings(page: number = 1, limit: number = 10) {
   const { userId } = await auth();
   
   // Check for admin token if no clerk user
@@ -75,6 +75,7 @@ export async function getCandidatesWithRankings() {
   // Fetch all candidates with their applications and position details
   const candidates = await prisma.candidate.findMany({
     include: {
+      user: true,
       applications: {
         include: {
           position: true
@@ -159,9 +160,9 @@ export async function getCandidatesWithRankings() {
 
     return {
       id: candidate.id,
-      name: candidate.name,
-      email: candidate.email,
-      phone: candidate.phone,
+      name: candidate.user?.name || "Unknown",
+      email: candidate.user?.email || "",
+      phone: candidate.user?.phone ?? null,
       resumeUrl: candidate.resumeUrl,
       skills: candidate.skills,
       experience: candidate.experience,
@@ -206,7 +207,18 @@ export async function getCandidatesWithRankings() {
     return bTenth - aTenth;
   });
 
-  return sortedCandidates;
+  const skip = (page - 1) * limit;
+  const paginatedCandidates = sortedCandidates.slice(skip, skip + limit);
+
+  return {
+    data: paginatedCandidates,
+    metadata: {
+      total: sortedCandidates.length,
+      page,
+      limit,
+      totalPages: Math.ceil(sortedCandidates.length / limit)
+    }
+  };
 }
 
 export async function getCandidateWithRanking(candidateId: string): Promise<DetailedCandidate | null> {
@@ -234,6 +246,7 @@ export async function getCandidateWithRanking(candidateId: string): Promise<Deta
   const candidate = await prisma.candidate.findUnique({
     where: { id: candidateId },
     include: {
+      user: true,
       applications: {
         include: {
           position: true,
@@ -344,9 +357,9 @@ export async function getCandidateWithRanking(candidateId: string): Promise<Deta
 
   return {
     id: candidate.id,
-    name: candidate.name,
-    email: candidate.email,
-    phone: candidate.phone,
+    name: candidate.user?.name || "Unknown",
+    email: candidate.user?.email || "",
+    phone: candidate.user?.phone ?? null,
     resumeUrl: candidate.resumeUrl,
     skills: candidate.skills,
     experience: candidate.experience,

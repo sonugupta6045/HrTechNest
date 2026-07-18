@@ -3,8 +3,10 @@ import { CandidatesList } from "@/components/dashboard/candidates-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCandidatesWithRankings } from "@/app/actions/candidate";
 
-export default async function CandidatesPage() {
-  const candidatesData = await getCandidatesWithRankings();
+export default async function CandidatesPage({ searchParams }: { searchParams: { page?: string, limit?: string } }) {
+  const page = parseInt(searchParams.page || "1");
+  const limit = parseInt(searchParams.limit || "10");
+  const result = await getCandidatesWithRankings(page, limit);
   
   return (
     <div className="p-6">
@@ -16,7 +18,11 @@ export default async function CandidatesPage() {
       </div>
       
       <Suspense fallback={<CandidatesListSkeleton />}>
-        <CandidatesList candidates={candidatesData} />
+        <CandidatesList 
+          candidates={result.data} 
+          totalPages={result.metadata.totalPages} 
+          currentPage={page} 
+        />
       </Suspense>
     </div>
   );

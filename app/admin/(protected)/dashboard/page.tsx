@@ -5,7 +5,7 @@ import { RecentApplications } from "@/components/dashboard/recent-applications";
 import { TopCandidates } from "@/components/dashboard/top-candidates";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { prisma as db } from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
   // Fetch dashboard statistics

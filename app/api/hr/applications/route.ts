@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { db } from "@/lib/db"
 import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 import { verifyRole } from "@/lib/auth-utils"
@@ -18,6 +17,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const sortBy = searchParams.get("sortBy") || "createdAt";
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
     // Build where clause
     const where: Prisma.ApplicationWhereInput = {
@@ -29,30 +31,38 @@ export async function GET(request: Request) {
       ? { matchScore: "desc" } 
       : { createdAt: "desc" };
 
-    const applications = await prisma.application.findMany({
-      where,
-      include: {
-        position: {
-          select: {
-            id: true,
-            title: true,
-            department: true
+    const [applications, total] = await Promise.all([
+      prisma.application.findMany({
+        where,
+        include: {
+          position: {
+            select: {
+              id: true,
+              title: true,
+              department: true
+            }
+          },
+          candidate: {
+            select: {
+              id: true,
+              skills: true,
+              experience: true,
+              user: {
+                select: {
+                  name: true,
+                  email: true,
+                  phone: true
+                }
+              }
+            }
           }
         },
-        candidate: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            skills: true,
-            experience: true
-          }
-        }
-      },
-      orderBy,
-      take: 50
-    });
+        orderBy,
+        skip,
+        take: limit
+      }),
+      prisma.application.count({ where })
+    ]);
 
     // Ensure relations are handled safely
     const transformedApplications = applications.map(app => ({
@@ -72,7 +82,15 @@ export async function GET(request: Request) {
       }
     }));
 
-    return NextResponse.json(transformedApplications);
+    return NextResponse.json({
+      data: transformedApplications,
+      metadata: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error("[APPLICATIONS_GET]", error);
     return NextResponse.json(
@@ -84,7 +102,7 @@ export async function GET(request: Request) {
 
 async function getPositionTitle(positionId: string): Promise<string | null> {
   try {
-    const position = await db.position.findUnique({
+    const position = await prisma.position.findUnique({
       where: { id: positionId },
       select: { title: true }
     });

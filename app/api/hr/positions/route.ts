@@ -2,45 +2,27 @@ import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import prisma from "@/lib/prisma"
 import { NextRequest } from "next/server"
-import { PrismaClient } from "@prisma/client"
-
-const prismaClient = new PrismaClient()
-
-import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
+import { verifyRole } from "@/lib/auth-utils"
 
 export async function POST(request: Request) {
   try {
     console.log("POST /api/positions - Starting to process request")
     
-    const authResult = await auth()
-    const userId = authResult?.userId
+    const { isAuthorized, userId } = await verifyRole(['HR', 'ADMIN']);
     
-    // Check for super admin
-    let isSuperAdmin = false;
-    if (!userId) {
-      const adminToken = cookies().get('admin_token')?.value;
-      if (adminToken) {
-        try {
-          const decoded = jwt.decode(adminToken) as any;
-          if (decoded?.role === 'SUPER_ADMIN') {
-            isSuperAdmin = true;
-          }
-        } catch (e) {}
-      }
-    }
-
-    if (!userId && !isSuperAdmin) {
+    if (!isAuthorized) {
       console.log("POST /api/positions - Unauthorized request")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    
+    const isSuperAdmin = userId === 'SUPER_ADMIN';
 
     const data = await request.json()
     console.log("POST /api/positions - Request data:", data)
 
     let authorUserId = 'SUPER_ADMIN_ID';
     
-    if (userId) {
+    if (!isSuperAdmin && userId) {
       // Get the user from the database using Clerk ID
       console.log("Finding user with clerkId:", userId)
       const user = await prisma.user.findUnique({
@@ -120,7 +102,7 @@ export async function GET(req: NextRequest) {
     
     const where = status ? { status: status as import("@prisma/client").PositionStatus } : {}
     
-    const positions = await prismaClient.position.findMany({
+    const positions = await prisma.position.findMany({
       where,
       orderBy: {
         createdAt: "desc",

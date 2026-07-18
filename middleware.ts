@@ -15,6 +15,9 @@ export default clerkMiddleware(async (auth, req) => {
     const adminToken = req.cookies.get('admin_token')?.value;
     
     if (!adminToken) {
+      if (req.url.includes('/api/')) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
     
@@ -25,6 +28,11 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.next();
     } catch (e) {
       // Invalid token
+      if (req.url.includes('/api/')) {
+        const response = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        response.cookies.delete('admin_token');
+        return response;
+      }
       const response = NextResponse.redirect(new URL('/admin/login', req.url));
       response.cookies.delete('admin_token');
       return response;
@@ -59,6 +67,9 @@ export default clerkMiddleware(async (auth, req) => {
       const { sessionClaims } = await auth();
       const role = (sessionClaims?.metadata as any)?.role;
       if (role !== 'HR' && role !== 'ADMIN') {
+        if (req.url.includes('/api/')) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
         return NextResponse.redirect(new URL('/candidate', req.url));
       }
     }

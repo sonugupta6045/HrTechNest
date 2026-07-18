@@ -138,7 +138,7 @@ function getCandidateName(candidate: any) {
   if (candidate.firstName && candidate.lastName) {
     return `${candidate.firstName} ${candidate.lastName}`;
   }
-  return candidate.name || 'Unknown';
+  return candidate.user?.name || 'Unknown';
 }
 
 // Memoized table row component for better performance
@@ -180,8 +180,8 @@ const CandidateRow = memo(
       <TableCell>{typeof candidate.position === 'string' ? candidate.position : candidate.position?.title || 'N/A'}</TableCell>
       <TableCell>
         <div className="flex flex-col">
-          <span className="text-sm">{candidate.email || 'N/A'}</span>
-          <span className="text-sm text-muted-foreground">{candidate.phone || 'No phone'}</span>
+          <span className="text-sm">{candidate.user?.email || 'N/A'}</span>
+          <span className="text-sm text-muted-foreground">{candidate.user?.phone || 'No phone'}</span>
         </div>
       </TableCell>
       <TableCell>
@@ -226,7 +226,7 @@ const CandidateRow = memo(
             variant="ghost" 
             size="icon" 
             className="h-8 w-8"
-            onClick={() => onSendEmail(candidate.email)}
+            onClick={() => onSendEmail(candidate.user?.email)}
           >
             <Mail className="h-4 w-4" />
             <span className="sr-only">Send email</span>
@@ -315,10 +315,10 @@ export function ShortlistedCandidates() {
     try {
       setLoading(true);
       // Change API call to fetch all candidates instead of just shortlisted
-      let url = "/api/hr/candidates";
+      let url = "/api/hr/candidates?limit=1000";
       
       if (selectedPosition !== "all") {
-        url += `?positionId=${selectedPosition}`;
+        url += `&positionId=${selectedPosition}`;
       }
       
       const response = await fetch(url);
@@ -327,7 +327,8 @@ export function ShortlistedCandidates() {
         throw new Error("Failed to fetch candidates");
       }
       
-      const data = await response.json();
+      const json = await response.json();
+      const data = json.data;
       console.log("API Response:", data); // Log the response for debugging
       
       // Transform data for UI
@@ -346,8 +347,8 @@ export function ShortlistedCandidates() {
           id: item.candidate?.id || '',
           applicationId: item.application?.id || '',
           name: getCandidateName(item.candidate),
-          email: item.candidate?.email || '',
-          phone: item.candidate?.phone || null,
+          email: item.candidate?.user?.email || '',
+          phone: item.candidate?.user?.phone || null,
           // Use multiple sources for position data with clear fallbacks
           position: item.position?.title || 
                    item.application?.position?.title || 
@@ -671,8 +672,8 @@ export function ShortlistedCandidates() {
   const filteredCandidates = useMemo(() => {
     return candidates.filter((candidate) => {
       const matchesSearch =
-        (candidate.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (candidate.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (candidate.user?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (candidate.user?.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (candidate.position || '').toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus = statusFilter === "all" || candidate.status === statusFilter;
@@ -960,15 +961,15 @@ export function ShortlistedCandidates() {
                       checked={selectedCandidates.includes(candidate.applicationId)}
                       onCheckedChange={() => toggleCandidate(candidate.applicationId)}
                       disabled={!candidate.applicationId || candidate.status === "Interview Scheduled" || candidate.status === "Rejected"}
-                      aria-label={`Select ${candidate.name}`}
+                      aria-label={`Select ${candidate.user?.name}`}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{candidate.name}</TableCell>
+                  <TableCell className="font-medium">{candidate.user?.name}</TableCell>
                   <TableCell>{candidate.position}</TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="text-sm">{candidate.email || 'N/A'}</span>
-                      <span className="text-sm text-muted-foreground">{candidate.phone || 'No phone'}</span>
+                      <span className="text-sm">{candidate.user?.email || 'N/A'}</span>
+                      <span className="text-sm text-muted-foreground">{candidate.user?.phone || 'No phone'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -1013,7 +1014,7 @@ export function ShortlistedCandidates() {
                         variant="ghost" 
                         size="icon" 
                         className="h-8 w-8"
-                        onClick={() => handleSendEmail(candidate.email)}
+                        onClick={() => handleSendEmail(candidate.user?.email)}
                       >
                         <Mail className="h-4 w-4" />
                         <span className="sr-only">Send email</span>

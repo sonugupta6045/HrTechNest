@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { auth } from "@clerk/nextjs/server"
+import { prisma as db } from "@/lib/prisma"
 
 export async function POST(request: Request) {
   try {
@@ -31,15 +32,33 @@ export async function POST(request: Request) {
       )
     }
 
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json({ error: "Unauthorized. Please log in to apply." }, { status: 401 });
+    }
+
     const skillsArray = Array.isArray(skills) ? skills : [skills]
 
-    const candidate = await db.candidate.upsert({
-      where: {
-        email: email,
-      },
+    const user = await db.user.upsert({
+      where: { clerkId },
       update: {
         name,
         phone,
+      },
+      create: {
+        id: clerkId,
+        clerkId,
+        name,
+        email,
+        phone,
+      }
+    });
+
+    const candidate = await db.candidate.upsert({
+      where: {
+        userId: user.id,
+      },
+      update: {
         resumeUrl,
         skills: skillsArray,
         experience,
@@ -51,9 +70,7 @@ export async function POST(request: Request) {
         twelfthPercentage,
       },
       create: {
-        name,
-        email,
-        phone,
+        userId: user.id,
         resumeUrl,
         skills: skillsArray,
         experience,

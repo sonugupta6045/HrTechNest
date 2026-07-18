@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { db } from "./db";
+import { prisma as db } from "./prisma";
 import { Role } from "@prisma/client";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";

@@ -7,9 +7,8 @@ import { Interview } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
+    const { isAuthorized, userId } = await verifyRole(['HR', 'ADMIN']);
+    if (!isAuthorized || !userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -49,7 +48,7 @@ export async function POST(req: NextRequest) {
           }
         },
         include: {
-          candidate: true,
+          candidate: { include: { user: true } },
           position: true
         }
       });
@@ -86,7 +85,7 @@ export async function POST(req: NextRequest) {
         if (useGoogleCalendar) {
           try {
             // Get all candidate emails for the event
-            const attendeeEmails = applications.map(app => app.candidate.email);
+            const attendeeEmails = applications.map(app => app.candidate.user?.email).filter(Boolean) as string[];
             
             // Add unique position titles to make the event title
             const positionTitles = Array.from(new Set(applications.map(app => app.position?.title)));
@@ -176,13 +175,14 @@ export async function POST(req: NextRequest) {
           createdInterviews.push(interview);
 
           // Queue email instead of sending it now
-          if (sendNotification) {
+          const candidateEmail = app.candidate?.user?.email;
+          if (sendNotification && candidateEmail) {
             notificationQueue.push({
-              email: app.candidate.email,
+              email: candidateEmail,
               subject: `Interview Scheduled for ${app.position?.title}`,
               html: `
                 <h1>Interview Scheduled</h1>
-                <p>Dear ${app.candidate?.name || 'Candidate'},</p>
+                <p>Dear ${app.candidate?.user?.name || 'Candidate'},</p>
                 <p>Your interview for the <strong>${app.position?.title}</strong> position has been scheduled for:</p>
                 <p><strong>Date and Time:</strong> ${new Date(scheduledFor).toLocaleString()}</p>
                 <p><strong>Duration:</strong> ${duration || 60} minutes</p>
@@ -251,42 +251,62 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const positionId = searchParams.get("positionId")
     const status = searchParams.get("status")
+    const search = searchParams.get("search")
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
     
     console.log("Fetching candidates with filters:", { positionId, status });
     
     // Fetch all applications with their candidates and positions
-    const applications = await prisma.application.findMany({
-      where: {
-        // Only filter by position if specified
-        ...(positionId ? { positionId } : {}),
-        // Only filter by status if specified
-        ...(status ? { status: status } : {})
-      },
-      include: {
-        candidate: true,
-        position: {
-          select: {
-            id: true,
-            title: true,
-            department: true,
-            location: true,
-            type: true
+    const whereClause: any = {
+      ...(positionId ? { positionId } : {}),
+      ...(status ? { status: status } : {})
+    };
+
+    if (search) {
+      whereClause.candidate = {
+        user: {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } }
+          ]
+        }
+      };
+    }
+
+    const [applications, total] = await Promise.all([
+      prisma.application.findMany({
+        where: whereClause,
+        include: {
+          candidate: { include: { user: true } },
+          position: {
+            select: {
+              id: true,
+              title: true,
+              department: true,
+              location: true,
+              type: true
+            }
+          },
+          interviews: {
+            where: {
+              status: "Scheduled"
+            },
+            orderBy: {
+              scheduledFor: 'asc'
+            },
+            take: 1
           }
         },
-        interviews: {
-          where: {
-            status: "Scheduled"
-          },
-          orderBy: {
-            scheduledFor: 'asc'
-          },
-          take: 1
-        }
-      },
-      orderBy: {
-        updatedAt: 'desc'
-      }
-    });
+        orderBy: {
+          updatedAt: 'desc'
+        },
+        skip,
+        take: limit
+      }),
+      prisma.application.count({ where: whereClause })
+    ]);
     
     console.log(`Found ${applications.length} applications`);
     
@@ -314,7 +334,15 @@ export async function GET(req: NextRequest) {
       };
     });
     
-    return NextResponse.json(formattedCandidates)
+    return NextResponse.json({
+      data: formattedCandidates,
+      metadata: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error("Error fetching candidates:", error)
     return NextResponse.json(

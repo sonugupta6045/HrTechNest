@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,19 @@ type CandidateProps = {
   }[];
 };
 
-export function CandidatesList({ candidates }: { candidates: CandidateProps[] }) {
+export function CandidatesList({ 
+  candidates, 
+  totalPages = 1, 
+  currentPage = 1 
+}: { 
+  candidates: CandidateProps[];
+  totalPages?: number;
+  currentPage?: number;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<"rank" | "skills" | "education">("rank");
   
@@ -266,6 +279,32 @@ export function CandidatesList({ candidates }: { candidates: CandidateProps[] })
           </TableBody>
         </Table>
       )}
+
+      <div className="flex items-center justify-between mt-4">
+        <Button 
+          disabled={currentPage === 1} 
+          onClick={() => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", (currentPage - 1).toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+          variant="outline"
+        >
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">Page {currentPage} of {totalPages}</span>
+        <Button 
+          disabled={currentPage >= totalPages} 
+          onClick={() => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set("page", (currentPage + 1).toString());
+            router.push(`${pathname}?${params.toString()}`);
+          }}
+          variant="outline"
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
